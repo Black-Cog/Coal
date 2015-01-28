@@ -187,11 +187,10 @@ class Main():
 		Alayout      = Anvil.core.Layout
 		Abutton      = Anvil.core.Button
 		Atextfield   = Anvil.core.Textfield
-		Acolorpicker = Anvil.core.Colorpicker
 		CfnShader    = Coal.core.FnShader()
 
 		# boxs init
-		box_shading            = Abox( name='Shading', w=self.__boxSize[0], h=self.__boxSize[1]*2 )
+		box_shading            = Abox( name='Shading', w=self.__boxSize[0], h=self.__boxSize[1]*5 )
 		self.layout_shaderAttr = Alayout( parent=box_shading )
 
 		# actions init
@@ -200,47 +199,37 @@ class Main():
 		# buttons init
 		button_lsShader = Abutton( name='Query', cmd=lsShader )
 
-		# colorpickers init
-		colorTest = Acolorpicker( color=[.5, .5, .5] )
-
 		# define layouts content
 		self.layout_main.add( box_shading )
 		self.layout_shaderAttr.add( [button_lsShader] )
-		self.layout_shaderAttr.add( [colorTest] )
 
 	def shadingAttributUI( self, attrs ):
 		# define class
 		Atext       = Anvil.core.Text
 		Atextfield  = Anvil.core.Textfield
 		Afloatfield = Anvil.core.Floatfield
+		Acolorpicker = Anvil.core.Colorpicker
 
-		field = Atextfield( text='new' )
+		# delete old item of the UI
+		for i in self.layout_shaderAttr.children():
+			if not 'Button' in str(i):
+				i.deleteLater()
 
-		# self.field.deleteLater()
+		# build UI
+		for attr in attrs:
+			text = Atext( text='%s :' %(attr[0]), w=200 )
 
-		self.layout_shaderAttr.add( field )
-		# from PySide import QtCore, QtGui
-		# for i in self.layout_shaderAttr.findChildren( QtGui.QLineEdit ):
-		# 	print i.text()
+			if attr[1] == 'string':
+				field = Atextfield( text=eval( attr[2] ), w=100 )
+			elif attr[1] == 'float':
+				field = Afloatfield( value=eval( attr[2] ), w=100)
+			if attr[1] == 'color':
+				tmpColor = eval(attr[2])
+				if not isinstance( tmpColor, list ) : tmpColor = [ tmpColor, tmpColor, tmpColor ]
+				field = Acolorpicker( color=tmpColor )
 
-		for attr in attrs : print attr
+			self.layout_shaderAttr.add( [text, field] )
 
-		# print self.layout_shaderAttr
-		# text = Atext( text='sfsf :' )
-		# field = Atextfield( text='attr[2]' )
-		# self.layout_shaderAttr.add( [text, field] )
-
-		# for attr in attrs:
-		# 	if attr[1] == 'string':
-		# 		print 'ok'
-		# 		text = Atext( text='%s :' %(attr[0]) )
-		# 		field = Atextfield( text=attr[2] )
-		# 	# if attr[1] == 'float':
-		# 	# 	Afloatfield( value=attr[2] )
-		# 	# if attr[1] == 'color':
-		# 	# 	Atextfield( text=attr[2] 
-		# 		self.layout_shaderAttr.add( [text, field] )
-		# 		break
 
 	def foo( self ):
 		print 'exec'
