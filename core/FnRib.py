@@ -1,6 +1,7 @@
 
 import Forge
 import Coal
+import Anvil.core
 
 class FnRib( object ):
 	"""docstring for FnRib"""
@@ -21,7 +22,7 @@ class FnRib( object ):
 
 		Fsystem.mkdir( path=[folderCamera, folderLight, folderShader, folderObject, folderStat, folderImage] )
 
-	def setRibWorld( self, arg ):
+	def setWorldRib( self, arg ):
 
 		# define filename
 		passname = 'beauty'
@@ -34,29 +35,29 @@ class FnRib( object ):
 
 		# define meshs
 		if arg.interpreter == 'maya' : meshs = self.getMayaMesh( arg )
+
 		else : meshs = self.getMesh( arg )
 
 		# define global inside content
 		content  = self.ribGlobal( arg=arg, passname=passname )
 
 		# define frame inside content
-		content  += '\nFrameBegin 1'
-		content  += '\n    WorldBegin'
-		content  += '\n        ReadArchive "light/light.rib"'
-		for shader in shaders:
-			content  += '\n        ArchiveBegin "%s surface"' %( shader )
-			content  += '\n            Surface "F:/dev/BCshading/sdl/BCmonolithic"'
-			content  += '\n        ArchiveEnd'
-		content  += '\n        ReadArchive "%s surface"' %( shaders[0] )
+		content += '\nFrameBegin 1'
+		content += '\n    WorldBegin'
+		content += '\n'
+		content += '\n        ReadArchive "light/light.rib"'
+		content += '\n'
 		for mesh in meshs:
-			content += '\n        ReadArchive "object/%s.rib"' %( mesh )
-		content  += '\n    WorldEnd'
-		content  += '\nFrameEnd'
-		content  += '\n'
+			content += '\n        AttributeBegin'
+			content += '\n            ReadArchive "shader/shader.rib"'
+			content += '\n            ReadArchive "object/%s.rib"' %( mesh )
+			content += '\n        AttributeEnd'
+			content += '\n'
+		content += '\n    WorldEnd'
+		content += '\nFrameEnd'
+		content += '\n'
 
 		Fsystem.setFile( path=filename, content=content, type='w' )
-
-
 
 	@staticmethod
 	def ribGlobal( arg, passname ):
@@ -76,13 +77,8 @@ class FnRib( object ):
 		globalString  += '\nFormat %i %i 1' %( formatX, formatY )
 		globalString  += '\nPixelSamples %s %s' %( pixelSample, pixelSample )
 
-		globalString  += '\nProjection "perspective" "fov" [ 60 ]'
-		globalString  += '\nScale 1 1 -1'
-		globalString  += '\nTranslate 0 0 -5'
-		globalString  += '\nRotate 0 0 1 0'
-
 		globalString  += '\nHider "raytrace"'
-		globalString  += '\nOrientation "rh"'
+		# globalString  += '\nOrientation "rh"'
 		globalString  += '\nOption "trace" "integer diffuseraycache" [ 1 ]'
 
 		globalString  += '\nOption "limits" "integer[2] bucketsize" [ %s %s ]' %( bucketSize, bucketSize )
@@ -96,15 +92,23 @@ class FnRib( object ):
 		globalString  += '\n    "string exrpixeltype" [ "float" ]'
 		globalString  += '\nOption "statistics" "integer endofframe" [ 3 ] "string filename" [ "stat/%s_0001.txt" ]' %( passname )
 
+		globalString  += '\nReadArchive "camera/camera.rib"'
+
 		globalString  += '\n'
 		return globalString
+
 
 	@staticmethod
 	def getMayaMesh( arg ):
 		import maya.cmds
 
 		path  = arg.textfield_pathWorkspace.text()
-		meshs = maya.cmds.ls( type='mesh' )
+		meshsFullname = maya.cmds.ls( type='mesh', long=True, visible=True )
+		meshs = []
+
+		for mesh in meshsFullname:
+			splitName = mesh.split('|')
+			if len( splitName ) > 1 : meshs.append( splitName[-1] )
 
 		return meshs
 
@@ -115,12 +119,64 @@ class FnRib( object ):
 
 		return meshs
 
-	def setMeshRib( self, arg ):
-		"""Write Mesh Rib"""
-		'@parameter string mesh Name of the shape.'
+	def setCameraRib( self, arg ):
+		import math
 		import maya.cmds
 
+		# define filename
+		passname = 'camera/camera'
+		path     = arg.textfield_pathWorkspace.text()
+		filename = '%s/%s.rib' %( path, passname )
+
+
+		cameraName = 'persp'
+
+		fl  = maya.cmds.getAttr( cameraName + '.focalLength' )
+		hfa = maya.cmds.getAttr( cameraName + '.hfa' ) *  25.4
+
+		frameaspectratio = float( arg.intfield_formatX.value() ) / float( arg.intfield_formatY.value() )
+
+		left   = -1.0
+		right  =  1.0
+		bottom = -1.0 / frameaspectratio
+		top    =  1.0 / frameaspectratio
+
+		fov = math.degrees( 2 * math.atan(hfa / (2 * fl)) )
+		tx  = maya.cmds.getAttr( '%s.translateX' %(cameraName) ) * -1
+		ty  = maya.cmds.getAttr( '%s.translateY' %(cameraName) ) * -1
+		tz  = maya.cmds.getAttr( '%s.translateZ' %(cameraName) ) * -1
+		rx  = maya.cmds.getAttr( '%s.rotateX'    %(cameraName) )
+		ry  = maya.cmds.getAttr( '%s.rotateY'    %(cameraName) )
+		rz  = maya.cmds.getAttr( '%s.rotateZ'    %(cameraName) ) * -1
+
+		# define frame inside content
+		content   = '\nProjection "perspective" "fov" [ %s ]' %( fov )
+		content  += '\nScreenWindow %s %s %s %s' %( left, right, bottom, top  )
+		content  += '\nRotate %s 1 0 0' %( rx )
+		content  += '\nRotate %s 0 1 0' %( ry )
+		content  += '\nRotate %s 0 0 1' %( rz )
+		content  += '\nScale 1 1 -1' 
+		content  += '\nTranslate %s %s %s' %( tx, ty, tz )
+		content  += '\n'
+
+		# TODO : use matrix for transformation "ConcatTransform [ 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 ]"
+
+		Forge.core.System().setFile( path=filename, content=content, type='w' )
+
+	def setObjectRib( self, arg ):
+
+		# define class
+		Fsystem = Forge.core.System()
+
 		path  = arg.textfield_pathWorkspace.text()
+		basepath = '%s/object/' %( path )
+
+		# clean up folder
+		Fsystem.cleanFolder( path=basepath )
+
+
+		# export start
+		import maya.cmds
 		meshs = self.getMayaMesh( arg )
 
 		for mesh in meshs:
@@ -246,3 +302,63 @@ class FnRib( object ):
 			rib.write( '\nAttributeEnd' )
 			rib.write( '\n' )
 			rib.close()
+
+	def setShaderRib( self, arg ):
+		# define filename
+		passname = 'shader/shader'
+		path     = arg.textfield_pathWorkspace.text()
+		filename = '%s/%s.rib' %( path, passname )
+
+		# define class
+		Fsystem = Forge.core.System()
+
+		# define frame inside content
+		content   = '\nSurface "F:/dev/BCshading/sdl/BCmonolithic"'
+
+
+		layout = arg.layout_shaderAttr.children()[0].children()[0].children()[0].children()
+		for i in range( len(layout) ):
+			if isinstance( layout[i], Anvil.core.Textfield ):
+				argtype  = 'string'
+				argname  = layout[i-1].text().split(' :')[0]
+				argvalue = '"%s"' %( layout[i].getValue() )
+				content  += '\n    "%s %s" %s' %( argtype, argname, argvalue )
+			elif isinstance( layout[i], Anvil.core.Floatfield ):
+				argtype  = 'float'
+				argname  = layout[i-1].text().split(' :')[0]
+				argvalue = layout[i].getValue()
+				content  += '\n    "%s %s" %s' %( argtype, argname, argvalue )
+			elif isinstance( layout[i], Anvil.core.Colorpicker ):
+				argtype  = 'color'
+				argname  = layout[i-1].text().split(' :')[0]
+				argvalue = str( layout[i].getValue() ).replace( ',', '')
+				content  += '\n    "%s %s" %s' %( argtype, argname, argvalue )
+
+		content  += '\n'
+
+		Fsystem.setFile( path=filename, content=content, type='w' )
+
+	def setLightRib( self, arg ):
+		# define filename
+		passname = 'light/light'
+		path     = arg.textfield_pathWorkspace.text()
+		filename = '%s/%s.rib' %( path, passname )
+
+		# define class
+		Fsystem = Forge.core.System()
+
+		# define frame inside content
+		content   = '\nAttributeBegin'
+		content  += '\n    Translate 0 0 0'
+		content  += '\n    Rotate 0 0 1 0'
+		content  += '\n    Scale 1 1 1'
+		content  += '\n    Translate 10 10 0'
+		content  += '\n    LightSource "E:/141031_defaultProject/maya/3delight/rib_scene_001/shaders/OBJ/light.sdl" "lightKey"'
+		content  += '\nAttributeEnd'
+		content  += '\n'
+		content  += '\nIlluminate "lightKey" 1'
+		content  += '\n'
+
+		Fsystem.setFile( path=filename, content=content, type='w' )
+
+
