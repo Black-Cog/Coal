@@ -16,14 +16,20 @@ class CoalActions( object ):
 		ribPath = '%s/beauty.rib' %( ribRoot )
 
 		# write rib
-		if rib == 'classic':
-			CfnRib.setMeshRib( arg )
-			CfnRib.setRibWorld( arg )
-		elif rib == 'lazy':
-			CfnRib.setRibWorld( arg )
-		elif rib == 'full':
-			CfnRib.setMeshRib( arg )
-			CfnRib.setRibWorld( arg )
+		CfnRib.setCameraRib( arg )
+		CfnRib.setObjectRib( arg )
+		CfnRib.setShaderRib( arg )
+		CfnRib.setLightRib( arg )
+		CfnRib.setWorldRib( arg )
+		# if rib == 'classic':
+		# 	CfnRib.setMeshRib( arg )
+		# 	CfnRib.setWorldRib( arg )
+		# 	print 'ok'
+		# elif rib == 'lazy':
+		# 	CfnRib.setWorldRib( arg )
+		# elif rib == 'full':
+		# 	CfnRib.setMeshRib( arg )
+		# 	CfnRib.setWorldRib( arg )
 
 		# launch render
 		self.render( rib=ribPath, type=type )

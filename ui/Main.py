@@ -11,8 +11,9 @@ class Main():
 		self.interpreter = Forge.core.System().interpreter()
 
 		self.workspacePath = 'F:/test/rnd/scene_001'
+		self.lightRigPath  = 'F:/test/light/rig_001/light.rib'
 		# define ui vars
-		self.__boxSize = [ 1900, 100 ]
+		self.__boxSize = [ 1860, 100 ]
 
 		# define class
 		Awindow = Anvil.core.Window
@@ -20,13 +21,15 @@ class Main():
 
 		# window init
 		self.window = Awindow( title='Coal', size=[ 1980, 1080 ] )
-		self.layout_main = Alayout( parent=self.window, x= 10, y=20 )
+		self.layout_main = Alayout( parent=self.window, y=10, w=1940, scroll=True )
 
 		# build ui
 		self.workspace()
 		self.ribExport()
 		self.render()
 		self.settings()
+		self.hierarchy()
+		self.light()
 		self.shading()
 
 	def workspace( self ):
@@ -123,6 +126,73 @@ class Main():
 		layout_main.add( [text_pathRender, self.textfield_pathRender] )
 		layout_main.add( [button_render, button_renderPreview] )
 
+	def hierarchy( self ):
+		# define class
+		Abox       = Anvil.core.Box
+		Alayout    = Anvil.core.Layout
+		Atree      = Anvil.core.Tree
+
+		# boxs init
+		box_render  = Abox( name='Render', w=self.__boxSize[0], h=self.__boxSize[1]*3 )
+		layout_main = Alayout( parent=box_render )
+
+
+		hierarchyList = [
+			[ 'object_001', 'obj',    'F:/dev/BCgit/icons/master.png', 'Information about object', 'Information about object icon', None ],
+			[ 'object_002', 'obj',    'F:/dev/BCgit/icons/master.png', 'Information about object', 'Information about object icon', None ],
+			[ 'object_003', 'obj',    'F:/dev/BCgit/icons/master.png', 'Information about object', 'Information about object icon', None ],
+			[ 'object_004', 'obj',    'F:/dev/BCgit/icons/master.png', 'Information about object', 'Information about object icon', None ],
+			[ 'object_005', 'obj',    'F:/dev/BCgit/icons/master.png', 'Information about object', 'Information about object icon', None ],
+			[ 'object_006', 'obj',    'F:/dev/BCgit/icons/master.png', 'Information about object', 'Information about object icon', None ],
+			[ 'object_007', 'obj',    'F:/dev/BCgit/icons/master.png', 'Information about object', 'Information about object icon', 'object_001' ],
+			[ 'object_008', 'obj',    'F:/dev/BCgit/icons/master.png', 'Information about object', 'Information about object icon', 'object_007' ],
+			[ 'object_009', 'obj',    'F:/dev/BCgit/icons/master.png', 'Information about object', 'Information about object icon', 'object_008' ],
+			[ 'object_010', 'obj',    'F:/dev/BCgit/icons/master.png', 'Information about object', 'Information about object icon', 'object_008' ],
+			[ 'object_011', 'obj',    'F:/dev/BCgit/icons/master.png', 'Information about object', 'Information about object icon', 'object_007' ],
+			[ 'object_012', 'obj',    'F:/dev/BCgit/icons/master.png', 'Information about object', 'Information about object icon', 'object_002' ],
+			[ 'object_013', 'obj',    'F:/dev/BCgit/icons/master.png', 'Information about object', 'Information about object icon', 'object_002' ],
+			[ 'object_014', 'obj',    'F:/dev/BCgit/icons/master.png', 'Information about object', 'Information about object icon', 'light_001' ],
+			[ 'object_015', 'obj',    'F:/dev/BCgit/icons/master.png', 'Information about object', 'Information about object icon', 'light_001' ],
+			[ 'light_001',  'light',  'F:/dev/BCgit/icons/new.png',    'Information about light',  'Information about light icon' , None ],
+			[ 'light_002',  'light',  'F:/dev/BCgit/icons/new.png',    'Information about light',  'Information about light icon' , None ],
+			[ 'camera_001', 'camera', 'F:/dev/BCgit/icons/edit.png',   'Information about camera', 'Information about camera icon', None ],
+				]
+
+		# tree init
+		tree_hierarchy = Atree()
+		tree_hierarchy.add( hierarchyList )
+
+		# define layouts content
+		self.layout_main.add( box_render )
+		layout_main.add( tree_hierarchy )
+
+	def light( self ):
+		# define class
+		Abox        = Anvil.core.Box
+		Alayout     = Anvil.core.Layout
+		Atext       = Anvil.core.Text
+		Atextfield  = Anvil.core.Textfield
+		Acheckbox   = Anvil.core.Checkbox
+
+		# boxs init
+		box_lighting  = Abox( name='Lighting', w=self.__boxSize[0], h=self.__boxSize[1] )
+		layout_main   = Alayout( parent=box_lighting )
+
+		# texts init
+		text_enableLightRig = Atext( text='Enable light rig :' )
+		text_lightRigPath   = Atext( text='Light rig path :' )
+
+		# checkboxs init
+		checkbox_enableLightRig = Acheckbox( value=True )
+
+		# textfields init
+		self.textfield_pathLightRig = Atextfield( text=self.lightRigPath )
+
+		# define layouts content
+		self.layout_main.add( box_lighting )
+		layout_main.add( [text_enableLightRig, checkbox_enableLightRig] )
+		layout_main.add( [text_lightRigPath, self.textfield_pathLightRig] )
+
 	def settings( self ):
 		# define class
 		Abox        = Anvil.core.Box
@@ -160,10 +230,10 @@ class Main():
 
 		# floats int
 		self.floatfield_formatMult = Afloatfield( value=0.25, min=0, max=4 )
-		self.floatfield_filterSize = Afloatfield( value=4, min=0, max=32 )
+		self.floatfield_filterSize = Afloatfield( value=2, min=0, max=32 )
 		
 		# dropmenus init
-		self.dropmenus_filterType = Adropmenu( items=['mitchell', 'box', 'triangle', 'catmull-rom', 'b-spline', 'gaussian', 'sinc', 'bessel'] )
+		self.dropmenus_filterType = Adropmenu( items=['blackman-harris', 'mitchell', 'box', 'triangle', 'catmull-rom', 'b-spline', 'gaussian', 'sinc', 'bessel'] )
 
 		# checkboxs init
 		checkbox_lockRatio = Acheckbox( value=True )
@@ -190,30 +260,33 @@ class Main():
 		CfnShader    = Coal.core.FnShader()
 
 		# boxs init
-		box_shading            = Abox( name='Shading', w=self.__boxSize[0], h=self.__boxSize[1]*5 )
-		self.layout_shaderAttr = Alayout( parent=box_shading )
+		box_shading            = Abox( name='Shading', w=self.__boxSize[0], h=self.__boxSize[1]*6 )
+		self.layout_shaderAttr = Alayout( parent=box_shading, scroll=True )
 
 		# actions init
 		lsShader = lambda: self.shadingAttributUI( attrs=CfnShader.queryShader(self) )
+		test = lambda: self.queryShading()
 
 		# buttons init
-		button_lsShader = Abutton( name='Query', cmd=lsShader )
+		# button_lsShader = Abutton( name='Query', cmd=lsShader )
+		button_lsShader = Abutton( name='Query', cmd=test )
 
 		# define layouts content
 		self.layout_main.add( box_shading )
 		self.layout_shaderAttr.add( [button_lsShader] )
+		lsShader()
 
 	def shadingAttributUI( self, attrs ):
 		# define class
-		Atext       = Anvil.core.Text
-		Atextfield  = Anvil.core.Textfield
-		Afloatfield = Anvil.core.Floatfield
+		Atext        = Anvil.core.Text
+		Atextfield   = Anvil.core.Textfield
+		Afloatfield  = Anvil.core.Floatfield
 		Acolorpicker = Anvil.core.Colorpicker
 
 		# delete old item of the UI
-		for i in self.layout_shaderAttr.children():
-			if not 'Button' in str(i):
-				i.deleteLater()
+		# for i in self.layout_shaderAttr.children():
+		# 	if not 'Button' in str(i):
+		# 		i.deleteLater()
 
 		# build UI
 		for attr in attrs:
@@ -229,6 +302,19 @@ class Main():
 				field = Acolorpicker( color=tmpColor )
 
 			self.layout_shaderAttr.add( [text, field] )
+
+	def queryShading( self ):
+		layout = self.layout_shaderAttr.children()[0].children()[0].children()[0].children()
+		for i in range( len(layout) ):
+			if isinstance( layout[i], Anvil.core.Textfield ):
+				print layout[i].getValue()
+				print layout[i-1].text()
+			elif isinstance( layout[i], Anvil.core.Floatfield ):
+				print layout[i].getValue()
+				print layout[i-1].text()
+			elif isinstance( layout[i], Anvil.core.Colorpicker ):
+				print layout[i].getValue()
+				print layout[i-1].text()
 
 
 	def foo( self ):
