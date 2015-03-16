@@ -45,7 +45,10 @@ class FnRib( object ):
 		content += '\nFrameBegin 1'
 		content += '\n    WorldBegin'
 		content += '\n'
-		content += '\n        ReadArchive "light/light.rib"'
+		content += '\nAttribute "visibility" "integer camera" [ 1 ]'
+		content += '\nAttribute "visibility" "integer transmission" [ 1 ]'
+		content += '\nAttribute "visibility" "integer diffuse" [ 1 ]'
+		content += '\nAttribute "visibility" "integer specular" [ 1 ]'
 		content += '\n'
 		for mesh in meshs:
 			content += '\n        AttributeBegin'
@@ -85,6 +88,9 @@ class FnRib( object ):
 		globalString  += '\nOption "limits" "integer texturememory" [ %s ]' %( textureCache )		
 		globalString  += '\nOption "limits" "color othreshold" [ 0.996 0.996 0.996 ] "color zthreshold" [ 0.996 0.996 0.996 ]'
 
+		globalString  += '\nOption "user" "integer diffuseIndirectEnable" [ 1 ]'
+		globalString  += '\nOption "user" "integer specularIndirectEnable" [ 1 ]'
+
 		globalString  += '\nDisplay "+image/%s_0001.exr" "exr" "rgba"' %( passname )
 		globalString  += '\n    "float[4] quantize" [ 0 0 0 0 ]'
 		globalString  += '\n    "string filter" [ "%s" ]' %( filterType )
@@ -93,6 +99,7 @@ class FnRib( object ):
 		globalString  += '\nOption "statistics" "integer endofframe" [ 3 ] "string filename" [ "stat/%s_0001.txt" ]' %( passname )
 
 		globalString  += '\nReadArchive "camera/camera.rib"'
+		globalString  += '\nReadArchive "light/light.rib"'
 
 		globalString  += '\n'
 		return globalString
@@ -348,12 +355,20 @@ class FnRib( object ):
 		Fsystem = Forge.core.System()
 
 		# define frame inside content
-		content   = '\nAttributeBegin'
+		content   = '\n'
+		content  += '\nOption "user" "string environnementMap" "E:/140817_tools/envLight/out/monumentValley/001/test_002.tif"'
+		content  += '\nOption "user" "color environnementTint" [1 1 1]'
+		content  += '\nOption "user" "color environnementShadowTint" [0 0 0]'
+		content  += '\nOption "user" "float environnementRadius" 100'
+		content  += '\nOption "user" "float environnementSample" 128'
+		content  += '\n'
+		content  += '\nAttributeBegin'
 		content  += '\n    Translate 0 0 0'
 		content  += '\n    Rotate 0 0 1 0'
 		content  += '\n    Scale 1 1 1'
 		content  += '\n    Translate 10 10 0'
 		content  += '\n    LightSource "E:/141031_defaultProject/maya/3delight/rib_scene_001/shaders/OBJ/light.sdl" "lightKey"'
+		content  += '\n        "color lightcolor" [0 0 0]'
 		content  += '\nAttributeEnd'
 		content  += '\n'
 		content  += '\nIlluminate "lightKey" 1'
