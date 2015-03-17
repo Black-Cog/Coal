@@ -6,30 +6,29 @@ import Coal
 class CoalActions( object ):
 	"""docstring for CoalActions"""
 
-	def renderLocal( self, arg, type='local', rib='classic' ):
+	def renderLocal( self, arg, type='local' ):
 
 		# define class
 		CfnRib = Coal.core.FnRib()
 
 		# get rib path
 		ribRoot = arg.textfield_pathWorkspace.text()
-		ribPath = '%s/beauty.rib' %( ribRoot )
+		passname = arg.textfield_passname.text()
+		ribPath = '%s/%s.rib' %( ribRoot, passname )
+
+		# get options
+		lazy = arg.checkbox_lazy.getValue()
 
 		# write rib
-		CfnRib.setCameraRib( arg )
-		CfnRib.setObjectRib( arg )
+		if arg.interpreter == 'maya':
+			CfnRib.setCameraRib( arg )
+			if not lazy:
+				CfnRib.setObjectRib( arg )
+			CfnRib.setLightRib( arg )
+
 		CfnRib.setShaderRib( arg )
-		CfnRib.setLightRib( arg )
 		CfnRib.setWorldRib( arg )
-		# if rib == 'classic':
-		# 	CfnRib.setMeshRib( arg )
-		# 	CfnRib.setWorldRib( arg )
-		# 	print 'ok'
-		# elif rib == 'lazy':
-		# 	CfnRib.setWorldRib( arg )
-		# elif rib == 'full':
-		# 	CfnRib.setMeshRib( arg )
-		# 	CfnRib.setWorldRib( arg )
+
 
 		# launch render
 		self.render( rib=ribPath, type=type )

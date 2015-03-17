@@ -31,6 +31,12 @@ class FnShader( object ):
 			for line in slFile:
 				if attr[0] in line and not '//' in line:
 					tmpValue = line.split( '=' )[-1].replace(' ', '').replace(';', '').replace('\n', '')
+
+					# fix color error
+					if '(' in tmpValue:
+						strValues = tmpValue.replace( '(', '' ).replace( ')', '' ).split( ',' )
+						tmpValue  = str( [ float(strValues[0]), float(strValues[1]), float(strValues[2]) ] )
+
 					attr.append( tmpValue )
 					break
 
