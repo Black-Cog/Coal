@@ -25,7 +25,7 @@ class FnRib( object ):
 	def setWorldRib( self, arg ):
 
 		# define filename
-		passname = 'beauty'
+		passname = arg.textfield_passname.text()
 		path     = arg.textfield_pathWorkspace.text()
 		filename = '%s/%s.rib' %( path, passname )
 		shaders  = ['BCmonolithic']
@@ -34,9 +34,7 @@ class FnRib( object ):
 		Fsystem = Forge.core.System()
 
 		# define meshs
-		if arg.interpreter == 'maya' : meshs = self.getMayaMesh( arg )
-
-		else : meshs = self.getMesh( arg )
+		meshs = self.getMesh( arg )
 
 		# define global inside content
 		content  = self.ribGlobal( arg=arg, passname=passname )
@@ -53,7 +51,7 @@ class FnRib( object ):
 		for mesh in meshs:
 			content += '\n        AttributeBegin'
 			content += '\n            ReadArchive "shader/shader.rib"'
-			content += '\n            ReadArchive "object/%s.rib"' %( mesh )
+			content += '\n            ReadArchive "object/%s"' %( mesh )
 			content += '\n        AttributeEnd'
 			content += '\n'
 		content += '\n    WorldEnd'
@@ -66,19 +64,34 @@ class FnRib( object ):
 	def ribGlobal( arg, passname ):
 		"""Return string global"""
 
-		formatMult   = arg.floatfield_formatMult.value()
-		formatX      = int( arg.intfield_formatX.value() * formatMult )
-		formatY      = int( arg.intfield_formatY.value() * formatMult )
-		pixelSample  = arg.intfield_pixelSample.value()
-		bucketSize   = arg.intfield_bucketSize.value()
-		textureCache = arg.intfield_textureCache.value()
+		formatMult   = arg.floatfield_formatMult.getValue()
+		formatX      = int( arg.intfield_formatX.getValue() * formatMult )
+		formatY      = int( arg.intfield_formatY.getValue() * formatMult )
+		pixelSample  = arg.intfield_pixelSample.getValue()
+		bucketSize   = arg.intfield_bucketSize.getValue()
+		textureCache = arg.intfield_textureCache.getValue()
 		filterType   = arg.dropmenus_filterType.value()
-		filterSize   = arg.floatfield_filterSize.value()
+		filterSize   = arg.floatfield_filterSize.getValue()
+
+		indirectDiffuse  = int( arg.checkbox_indirectDiffuse.getValue() )
+		indirectSpecular = int( arg.checkbox_indirectSpecular.getValue() )
+		cropEnable = arg.checkbox_crop.getValue()
+		if cropEnable:
+			cropMinX = arg.floatfield_cropMinX.getValue()
+			cropMaxX = arg.floatfield_cropMaxX.getValue()
+			cropMinY = arg.floatfield_cropMinY.getValue()
+			cropMaxY = arg.floatfield_cropMaxY.getValue()
+		else:
+			cropMinX = 0
+			cropMaxX = 1
+			cropMinY = 0
+			cropMaxY = 1
 
 		# define file content
 		globalString  =  '\n#Black Cog Rib\n\n'
 		globalString  += '\nFormat %i %i 1' %( formatX, formatY )
 		globalString  += '\nPixelSamples %s %s' %( pixelSample, pixelSample )
+		globalString  += '\nCropWindow %s %s %s %s' %( cropMinX, cropMaxX, cropMinY, cropMaxY )
 
 		globalString  += '\nHider "raytrace"'
 		# globalString  += '\nOrientation "rh"'
@@ -88,8 +101,8 @@ class FnRib( object ):
 		globalString  += '\nOption "limits" "integer texturememory" [ %s ]' %( textureCache )		
 		globalString  += '\nOption "limits" "color othreshold" [ 0.996 0.996 0.996 ] "color zthreshold" [ 0.996 0.996 0.996 ]'
 
-		globalString  += '\nOption "user" "integer diffuseIndirectEnable" [ 1 ]'
-		globalString  += '\nOption "user" "integer specularIndirectEnable" [ 1 ]'
+		globalString  += '\nOption "user" "integer diffuseIndirectEnable" [ %s ]' %( indirectDiffuse )
+		globalString  += '\nOption "user" "integer specularIndirectEnable" [ %s ]' %( indirectSpecular )
 
 		globalString  += '\nDisplay "+image/%s_0001.exr" "exr" "rgba"' %( passname )
 		globalString  += '\n    "float[4] quantize" [ 0 0 0 0 ]'
@@ -121,7 +134,7 @@ class FnRib( object ):
 
 	@staticmethod
 	def getMesh( arg ):
-		path  = arg.textfield_pathWorkspace.text()
+		path  = '%s/object' %( arg.textfield_pathWorkspace.text() )
 		meshs = Forge.core.System().list( path=path, file=True, folder=False )
 
 		return meshs
@@ -188,7 +201,7 @@ class FnRib( object ):
 
 		for mesh in meshs:
 			# init var
-			filename   = '%s/object/%s.rib' %( path, mesh )
+			filename   = '%s/object/%s.rib' %( path, mesh.replace( ':', '-' ) )
 			face       = ' '
 			vtxPerFace = ' '
 			vtxIndex   = ' '

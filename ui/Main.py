@@ -25,11 +25,11 @@ class Main():
 
 		# build ui
 		self.workspace()
-		self.ribExport()
+		# self.ribExport()
 		self.render()
 		self.settings()
-		self.hierarchy()
-		self.light()
+		# self.hierarchy()
+		# self.light()
 		self.shading()
 
 	def workspace( self ):
@@ -42,7 +42,7 @@ class Main():
 		CfnRib     = Coal.core.FnRib()
 
 		# boxs init
-		box_workspace = Abox( name='Workspace', w=self.__boxSize[0], h=self.__boxSize[1] )
+		box_workspace = Abox( name='Workspace', w=self.__boxSize[0], h=self.__boxSize[1]/1.5 )
 		layout_main   = Alayout( parent=box_workspace )
 
 		# texts init
@@ -96,8 +96,6 @@ class Main():
 		# define class
 		Abox       = Anvil.core.Box
 		Alayout    = Anvil.core.Layout
-		Atext      = Anvil.core.Text
-		Atextfield = Anvil.core.Textfield
 		Abutton    = Anvil.core.Button
 		Cactions   = Coal.core.CoalActions()
 
@@ -105,25 +103,16 @@ class Main():
 		box_render  = Abox( name='Render', w=self.__boxSize[0], h=self.__boxSize[1] )
 		layout_main = Alayout( parent=box_render )
 
-		# texts init
-		text_pathRender = Atext( text='Path render :' )
-
-		# textfields init
-		self.textfield_pathRender = Atextfield( text='' )
-
 		# actions init
-		rib = 'lazy'
-		if self.interpreter == 'maya' : rib = 'classic'
-		renderLocal   = lambda: Cactions.renderLocal( self, rib=rib )
-		renderPreview = lambda: Cactions.renderLocal( self, type='preview', rib=rib )
+		renderLocal   = lambda: Cactions.renderLocal( self )
+		renderPreview = lambda: Cactions.renderLocal( self, type='preview' )
 
 		# buttons init
-		button_render        = Abutton( name='Render', cmd=renderLocal, w=150 )
-		button_renderPreview = Abutton( name='Render Preview', cmd=renderPreview, w=200 )
+		button_render        = Abutton( name='Render', cmd=renderLocal, w=250, h=50 )
+		button_renderPreview = Abutton( name='Render Preview', cmd=renderPreview, w=250, h=50 )
 
 		# define layouts content
 		self.layout_main.add( box_render )
-		layout_main.add( [text_pathRender, self.textfield_pathRender] )
 		layout_main.add( [button_render, button_renderPreview] )
 
 	def hierarchy( self ):
@@ -207,19 +196,29 @@ class Main():
 		Cactions    = Coal.core.CoalActions()
 
 		# boxs init
-		box_settings  = Abox( name='Settings', w=self.__boxSize[0], h=self.__boxSize[1]*2 )
+		box_settings  = Abox( name='Settings', w=self.__boxSize[0], h=self.__boxSize[1]*3 )
 		layout_main   = Alayout( parent=box_settings )
 
 		# texts init
-		text_format       = Atext( text='Format :' )
-		text_lockRatio    = Atext( text='Lock aspect ratio :' )
-		text_formatMult   = Atext( text='Multiply format by :' )
-		text_pixelSample  = Atext( text='Pixel sample :' )
-		text_bucketSize   = Atext( text='Bucket size :' )
-		text_textureCache = Atext( text='Texture cache :' )
-		text_filterType   = Atext( text='Filter Type :' )
-		text_filterSize   = Atext( text='Filter size :' )
-		text_crop         = Atext( text='Crop :' )
+		text_passname         = Atext( text='Pass name :' )
+		text_format           = Atext( text='Format :' )
+		text_formatMult       = Atext( text='Multiply format by :' )
+		text_pixelSample      = Atext( text='Pixel sample :' )
+		text_bucketSize       = Atext( text='Bucket size :' )
+		text_textureCache     = Atext( text='Texture cache :' )
+		text_filterType       = Atext( text='Filter Type :' )
+		text_filterSize       = Atext( text='Filter size :' )
+		text_indirectDiffuse  = Atext( text='Indirect Diffuse :'   , w=80 )
+		text_indirectSpecular = Atext( text='Indirect Specular :'  , w=80 )
+		text_lazy             = Atext( text='Lazy :'  , w=35 )
+		text_crop             = Atext( text='Crop :'  , w=35 )
+		text_cropMinX         = Atext( text='min x :' , w=35 )
+		text_cropMaxX         = Atext( text='max x :' , w=35 )
+		text_cropMinY         = Atext( text='min y :' , w=35 )
+		text_cropMaxY         = Atext( text='max y :' , w=35 )
+
+		# textfields init
+		self.textfield_passname = Atextfield( text='beauty' )
 
 		# ints init
 		self.intfield_formatX      = Aintfield( value=1920,      min=1,    max=4096 )
@@ -230,26 +229,40 @@ class Main():
 
 		# floats int
 		self.floatfield_formatMult = Afloatfield( value=0.25, min=0, max=4 )
-		self.floatfield_filterSize = Afloatfield( value=2, min=0, max=32 )
+		self.floatfield_filterSize = Afloatfield( value=4, min=0, max=32 )
+		self.floatfield_cropMinX   = Afloatfield( value=0, min=0, max=1 , w=35 )
+		self.floatfield_cropMaxX   = Afloatfield( value=1, min=0, max=1 , w=35 )
+		self.floatfield_cropMinY   = Afloatfield( value=0, min=0, max=1 , w=35 )
+		self.floatfield_cropMaxY   = Afloatfield( value=1, min=0, max=1 , w=35 )
 		
 		# dropmenus init
-		self.dropmenus_filterType = Adropmenu( items=['blackman-harris', 'mitchell', 'box', 'triangle', 'catmull-rom', 'b-spline', 'gaussian', 'sinc', 'bessel'] )
+		self.dropmenus_filterType = Adropmenu( items=['mitchell', 'blackman-harris', 'box', 'triangle', 'catmull-rom', 'b-spline', 'gaussian', 'sinc', 'bessel'] )
 
 		# checkboxs init
-		checkbox_lockRatio = Acheckbox( value=True )
-		checkbox_crop      = Acheckbox( value=True )
+		self.checkbox_indirectDiffuse  = Acheckbox( value=True )
+		self.checkbox_indirectSpecular = Acheckbox( value=True )
+		self.checkbox_lazy             = Acheckbox( value=True )
+		self.checkbox_crop                  = Acheckbox( value=False )
 
 		# define layouts content
 		self.layout_main.add( box_settings )
+		layout_main.add( [text_passname, self.textfield_passname] )
 		layout_main.add( [	text_format, self.intfield_formatX, self.intfield_formatY,
-							text_lockRatio, checkbox_lockRatio,
 							text_formatMult, self.floatfield_formatMult] )
 		layout_main.add( [text_pixelSample, self.intfield_pixelSample] )
 		layout_main.add( [	text_bucketSize, self.intfield_bucketSize,
 							text_textureCache, self.intfield_textureCache] )
 		layout_main.add( [	text_filterType, self.dropmenus_filterType,
 							text_filterSize, self.floatfield_filterSize] )
-		layout_main.add( [text_crop, checkbox_crop] )
+		layout_main.add( [text_lazy, self.checkbox_lazy] )
+		layout_main.add( [text_indirectDiffuse, self.checkbox_indirectDiffuse, text_indirectSpecular, self.checkbox_indirectSpecular] )
+		layout_main.add( [	text_crop, self.checkbox_crop,
+							text_cropMinX, self.floatfield_cropMinX,
+							text_cropMaxX, self.floatfield_cropMaxX,
+							text_cropMinY, self.floatfield_cropMinY,
+							text_cropMaxY, self.floatfield_cropMaxY
+							] )
+
 
 	def shading( self ):
 		# define class
