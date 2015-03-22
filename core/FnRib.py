@@ -333,7 +333,7 @@ class FnRib( object ):
 		Fsystem = Forge.core.System()
 
 		# define frame inside content
-		content   = '\nSurface "F:/dev/BCshading/sdl/BCmonolithic"'
+		content   = '\nSurface "F:/software/bcShading_0.0.0.1dev/sdl/BCmonolithic"'
 
 
 		layout = arg.layout_shaderAttr.children()[0].children()[0].children()[0].children()
