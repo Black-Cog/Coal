@@ -154,7 +154,7 @@ class FnRib( object ):
 		fl  = maya.cmds.getAttr( cameraName + '.focalLength' )
 		hfa = maya.cmds.getAttr( cameraName + '.hfa' ) *  25.4
 
-		frameaspectratio = float( arg.intfield_formatX.value() ) / float( arg.intfield_formatY.value() )
+		frameaspectratio = float( arg.intfield_formatX.getValue() ) / float( arg.intfield_formatY.getValue() )
 
 		left   = -1.0
 		right  =  1.0
