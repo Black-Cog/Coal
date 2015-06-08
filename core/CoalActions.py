@@ -1,5 +1,4 @@
 
-import os
 import Forge
 import Coal
 
@@ -47,12 +46,9 @@ class CoalActions( object ):
 			# define command
 			command  = '%s %s %s' %( renderer, flag, file )
 
-			# define class
-			Fprocess = Forge.core.Process()
-
 			# set env
-			os.chdir( path )
+			Forge.core.System.setEnv( path )
 
 			# launch command
-			Fprocess.launch( command=command )
+			Forge.core.Process.execShell( command=command )
 
