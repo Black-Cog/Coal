@@ -236,7 +236,19 @@ class Main():
 		self.floatfield_cropMaxY   = Afloatfield( value=1, min=0, max=1 , w=35 )
 		
 		# dropmenus init
-		self.dropmenus_filterType = Adropmenu( items=['mitchell', 'blackman-harris', 'box', 'triangle', 'catmull-rom', 'b-spline', 'gaussian', 'sinc', 'bessel'] )
+		self.dropmenus_filterType = Adropmenu(
+			items=[
+				{ 'mitchell':'Mitchell' },
+				{ 'blackman-harris':'Blackman Harris' },
+				{ 'box':'Box' },
+				{ 'triangle':'Triangle' },
+				{ 'catmull-rom':'Catmull Rom' },
+				{ 'b-spline':'b-spline' },
+				{ 'gaussian':'Gaussian' },
+				{ 'sinc':'sinc' },
+				{ 'bessel':'Bessel' },
+					]
+					)
 
 		# checkboxs init
 		self.checkbox_indirectDiffuse  = Acheckbox( value=True )

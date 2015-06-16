@@ -70,7 +70,7 @@ class FnRib( object ):
 		pixelSample  = arg.intfield_pixelSample.getValue()
 		bucketSize   = arg.intfield_bucketSize.getValue()
 		textureCache = arg.intfield_textureCache.getValue()
-		filterType   = arg.dropmenus_filterType.value()
+		filterType   = arg.dropmenus_filterType.getValue()
 		filterSize   = arg.floatfield_filterSize.getValue()
 
 		indirectDiffuse  = int( arg.checkbox_indirectDiffuse.getValue() )
