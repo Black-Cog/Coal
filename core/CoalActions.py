@@ -33,7 +33,7 @@ class CoalActions( object ):
 		self.render( rib=ribPath, type=type )
 
 	@staticmethod
-	def render( renderer='C:/Program Files/3Delight/bin/renderdl.exe', rib=None, type='local' ):
+	def render( renderer=Forge.core.Env().renderdl, rib=None, type='local' ):
 		if rib:
 			ribFrag  = rib.replace( '\\', '/' ).split( '/' )
 			file     = ribFrag[-1]
